@@ -1,13 +1,16 @@
 async function includePartials() {
   const blocks = document.querySelectorAll("[data-include]");
+  for (const el of blocks) {
+    const file = el.getAttribute("data-include");
+    const res = await fetch(file, { cache: "no-cache" });
+    if (res.ok) el.innerHTML = await res.text();
+  }
+}
+document.addEventListener("DOMContentLoaded", includePartials);
 
-  await Promise.all(
-    Array.from(blocks).map(async (el) => {
-      const file = el.getAttribute("data-include");
-      const res = await fetch(file);
-      el.outerHTML = await res.text();
-    })
-  );
+document.addEventListener("DOMContentLoaded", () => {
+  includePartials().catch(console.error);
+});
 
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
@@ -28,7 +31,7 @@ async function includePartials() {
     const link = document.querySelector(`.nav-link[data-nav="${key}"]`);
     if (link) link.classList.add("active");
   }
-}
+
 
 includePartials().catch(console.error);
 (() => {
